@@ -20,7 +20,7 @@ services:
     shared: false
 
   dkan.metastore.storage:
-    class: \Drupal\metastore\Storage\NodeStorageFactory
+    class: \Drupal\metastore\Storage\MetastoreDataNodeStorageFactory
     arguments:
       - '@entity_type.manager'
 
@@ -56,3 +56,8 @@ services:
     class: \Drupal\metastore\Storage\ResourceMapperDatabaseTable
     arguments:
       - '@database'
+
+  dkan.metastore.metastore_item_factory:
+    class: \Drupal\metastore\Factory\MetastoreDataNodeFactory
+    arguments:
+      - '@entity.repository'
