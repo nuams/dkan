@@ -2,6 +2,7 @@
 
 namespace Drupal\harvest;
 
+use Drupal\common\LoggerTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Harvest\Harvester as DkanHarvester;
@@ -18,6 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Service implements ContainerInjectionInterface {
 
   use OrphanDatasetsProcessor;
+  use LoggerTrait;
 
   private $storeFactory;
 
@@ -232,12 +234,17 @@ class Service implements ContainerInjectionInterface {
     }
 
     foreach ($lastRunInfoObj->status->extracted_items_ids as $uuid) {
-      if (isset($lastRunInfoObj->status->load) &&
-        $lastRunInfoObj->status->load->{$uuid} &&
-        $lastRunInfoObj->status->load->{$uuid} != "FAILURE" &&
-        $this->metastore->publish('dataset', $uuid)) {
+      try {
+        if (isset($lastRunInfoObj->status->load) &&
+          $lastRunInfoObj->status->load->{$uuid} &&
+          $lastRunInfoObj->status->load->{$uuid} != "FAILURE" &&
+          $this->metastore->publish('dataset', $uuid)) {
 
-        $publishedIdentifiers[] = $uuid;
+          $publishedIdentifiers[] = $uuid;
+        }
+      }
+      catch (\Exception $e) {
+        $this->error("Error publishing dataset {$uuid} in harvest {$id}: {$e->getMessage()}");
       }
     }
 
