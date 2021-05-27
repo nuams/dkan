@@ -102,7 +102,7 @@ class Data implements StorerInterface, RetrieverInterface, BulkRetrieverInterfac
       return $node->get('field_json_metadata')->getString();
     }
 
-    throw new \Exception("No data with that identifier was found.");
+    throw new \Exception("Error retrieving published dataset: {$uuid} not found.");
   }
 
   /**
@@ -123,7 +123,7 @@ class Data implements StorerInterface, RetrieverInterface, BulkRetrieverInterfac
       return $node->get('field_json_metadata')->getString();
     }
 
-    throw new \Exception("No data with that identifier was found.");
+    throw new \Exception("Error retrieving dataset: {$uuid} not found.");
   }
 
   /**
@@ -143,16 +143,17 @@ class Data implements StorerInterface, RetrieverInterface, BulkRetrieverInterfac
 
     $node = $this->getNodeLatestRevision($uuid);
 
-    if ($node) {
-      $moderationState = $node->moderation_state->value;
-      if ($moderationState !== 'published') {
-        $node->set('moderation_state', 'published');
-        $node->save();
-        return $uuid;
-      }
+    if (!$node) {
+      throw new \Exception("Error publishing dataset: {$uuid} not found.");
     }
-
-    throw new \Exception("No data with that identifier was found.");
+    elseif ('published' !== $node->get('moderation_state')) {
+      $node->set('moderation_state', 'published');
+      $node->save();
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   /**
