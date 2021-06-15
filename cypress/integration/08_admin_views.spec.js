@@ -37,7 +37,7 @@ context('Admin content and dataset views', () => {
 
     it('The dataset edit link should go to the json form.', () => {
         cy.visit(baseurl + "/admin/dkan/datasets")
-        cy.get('.views-field-nothing > a').invoke('attr', 'href').should('contain', '/edit');
+        cy.get('td.views-field-nothing > a').invoke('attr', 'href').should('contain', '/edit');
     })
 
 })
